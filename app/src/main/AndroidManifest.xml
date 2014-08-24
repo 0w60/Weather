@@ -19,7 +19,7 @@
 
         <provider
             android:name=".WeatherDbProvider"
-            android:authorities="content://com.evgsoft.weatherprovider/weathertable"
+            android:authorities="content://com.evgsoft.weather.weatherdbprovider/weathertable"
             android:enabled="true"
             android:exported="true"></provider>
     </application>
