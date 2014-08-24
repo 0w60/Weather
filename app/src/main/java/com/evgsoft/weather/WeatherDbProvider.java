@@ -8,6 +8,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.widget.EditText;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
 JSON request: http://api.openweathermap.org/data/2.5/forecast/daily?q=Kiev&mode=json&units=metric&cnt=7
@@ -19,12 +25,31 @@ XML request: http://api.openweathermap.org/data/2.5/forecast/daily?q=London&mode
 public class WeatherDbProvider extends ContentProvider {
 
     private static final Uri CONTENT_URI = Uri.parse(
-            "content://com.evgsoft.weather.weatherprovider/weathertable");
+            "content://com.evgsoft.weather.weatherdbprovider/weathertable");
     private SQLiteDatabase database;
+    int numberOfDays = 7;
+    String city = "Kiev";
+    URL webServiceUrl;
+    private ArrayList<Weather> weatherList;
 
     public WeatherDbProvider() {
     }
 
+
+    //FINISHED HERE
+
+
+    public void populateDatabase() throws MalformedURLException {
+//        EditText cityEditText =
+        webServiceUrl = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=" + city + "&mode=json&units=metric&cnt=" + numberOfDays);
+        weatherList = new GetWeatherTask(webServiceUrl).doInBackground();
+
+
+        ContentValues values = new ContentValues();
+
+
+
+    }
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         // Implement this to handle requests to delete one or more rows.

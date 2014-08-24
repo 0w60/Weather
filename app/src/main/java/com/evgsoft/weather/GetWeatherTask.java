@@ -1,37 +1,41 @@
 package com.evgsoft.weather;
 
-import android.content.ContentQueryMap;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-/**
- * Created by artem on 8/24/14.
- */
-public class GetWeatherTask extends AsyncTask<URL, Void, String> {
+
+public class GetWeatherTask extends AsyncTask<URL, Void, ArrayList<Weather>> {
 
     private static final String TAG = "GetWeatherTask";
 
     URL webServiceUrl;
     String jsonString;
+    ArrayList<Weather> weatherList;
 
     public GetWeatherTask(URL webServiceUrl) {
         this.webServiceUrl = webServiceUrl;
     }
 
-
     @Override
-    protected String doInBackground(URL... url) {
+    protected ArrayList<Weather> doInBackground(URL... url) {
         connectToServiceAndGetJsonString(webServiceUrl);
+        jsonStringDeserialize();
 
-        return null;
+        Log.i(TAG, "weatherList: " + weatherList.toString());
+
+        return weatherList;
     }
 
     private String connectToServiceAndGetJsonString(URL webServiceUrl) {
@@ -66,5 +70,14 @@ public class GetWeatherTask extends AsyncTask<URL, Void, String> {
         Log.i(TAG, " jsonString: " + jsonString);
 
         return jsonString;
+    }
+
+    private List<Weather> jsonStringDeserialize() {
+        GsonBuilder gsnBldr = new GsonBuilder();
+        gsnBldr.registerTypeAdapter(Weather[].class, new WeatherDeserializer());
+        Gson gson = gsnBldr.create();
+        Weather[] array = gson.fromJson(jsonString, Weather[].class);
+        weatherList = new ArrayList<Weather>(Arrays.asList(array));
+        return weatherList;
     }
 }
