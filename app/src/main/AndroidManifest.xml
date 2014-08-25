@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.evgsoft.weather">
+    package="com.evgsoft.weather" >
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,8 +21,18 @@
             android:name=".WeatherDbProvider"
             android:authorities="content://com.evgsoft.weather.weatherdbprovider/weathertable"
             android:enabled="true"
-            android:exported="true"></provider>
+            android:exported="true" />
+
+        <activity
+            android:name=".Forecast"
+            android:label="@string/title_activity_forecast" >
+        </activity>
+        <activity
+            android:name=".ViewsForLstView"
+            android:label="@string/title_activity_views_for_lst_view" >
+        </activity>
     </application>
+
     <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

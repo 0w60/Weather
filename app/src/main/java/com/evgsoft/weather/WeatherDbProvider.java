@@ -1,6 +1,7 @@
 package com.evgsoft.weather;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -8,12 +9,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.widget.EditText;
+import android.util.Log;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 /*
 JSON request: http://api.openweathermap.org/data/2.5/forecast/daily?q=Kiev&mode=json&units=metric&cnt=7
@@ -21,35 +21,53 @@ XML request: http://api.openweathermap.org/data/2.5/forecast/daily?q=London&mode
 */
 
 
-
 public class WeatherDbProvider extends ContentProvider {
 
     private static final Uri CONTENT_URI = Uri.parse(
             "content://com.evgsoft.weather.weatherdbprovider/weathertable");
+    private static final String TAG = "WeatherDbProvider";
     private SQLiteDatabase database;
-    int numberOfDays = 7;
-    String city = "Kiev";
-    URL webServiceUrl;
+    static URL webServiceUrl;
     private ArrayList<Weather> weatherList;
 
     public WeatherDbProvider() {
     }
 
-
-    //FINISHED HERE
-
-
-    public void populateDatabase() throws MalformedURLException {
-//        EditText cityEditText =
-        webServiceUrl = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=" + city + "&mode=json&units=metric&cnt=" + numberOfDays);
-        weatherList = new GetWeatherTask(webServiceUrl).doInBackground();
-
-
-        ContentValues values = new ContentValues();
-
-
-
+    @Override
+    public boolean onCreate() {
+        database = new WeatherDbHelper(getContext()).getWritableDatabase();
+        getDataFromServerToWeatherList();
+        populateDatabase();
+        return (database != null);
     }
+
+    public void getDataFromServerToWeatherList() {
+        try {
+            String city = MainActivity.city;
+            int numberOfDays = MainActivity.daysNumber;
+            webServiceUrl = new URL(
+                    "http://api.openweathermap.org/data/2.5/forecast/daily?q=" + city + "&mode=json&units=metric&cnt=" + numberOfDays);
+            weatherList = new GetWeatherTask(webServiceUrl).doInBackground();
+        } catch (MalformedURLException e) {
+            Log.w(TAG, "URL is incorrect", e);
+        }
+    }
+
+    public void populateDatabase() {
+        insert (CONTENT_URI, setContentValues(weatherList));
+    }
+
+    public ContentValues setContentValues(ArrayList<Weather> list) {
+        ContentValues values = new ContentValues();
+        for (Weather w : list) {
+            values.put(WeatherDbHelper.CITY_COLUMN, w.city);
+            values.put(WeatherDbHelper.DAY_COLUMN, w.day);
+            values.put(WeatherDbHelper.WEATHER_CONDITION_COLUMN, w.weathrCondtns);
+            values.put(WeatherDbHelper.TEMPERATURE_COLUMN, w.temperature);
+        }
+        return values;
+    }
+
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         // Implement this to handle requests to delete one or more rows.
@@ -65,19 +83,20 @@ public class WeatherDbProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        // TODO: Implement this to handle requests to insert a new row.
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public boolean onCreate() {
-        database = new WeatherDbHelper(getContext()).getWritableDatabase();
-        return (database != null);
+        database.insert(WeatherDbHelper.TABLE_NAME, WeatherDbHelper.CITY_COLUMN, values);
+        Uri lastAddedItem = ContentUris.withAppendedId(CONTENT_URI,  values.size());
+        return lastAddedItem;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
+
+
+
+        FINISHED HERE
+
+
         // TODO: Implement this to handle query requests from clients.
         throw new UnsupportedOperationException("Not yet implemented");
     }
@@ -109,7 +128,7 @@ public class WeatherDbProvider extends ContentProvider {
                     CITY_COLUMN + " text, " + DAY_COLUMN + " text, " + WEATHER_CONDITION_COLUMN + " text, " +
                     TEMPERATURE_COLUMN + " text);");
 
-            //TEST
+            /*//TEST
             ContentValues values = new ContentValues();
             //Preparing the row for inserting into the table
             values.put(CITY_COLUMN, "London");
@@ -117,7 +136,7 @@ public class WeatherDbProvider extends ContentProvider {
             values.put(WEATHER_CONDITION_COLUMN, "sunny");
             values.put(TEMPERATURE_COLUMN, "+22");
             //inserting the row into the table
-            db.insert(TABLE_NAME, CITY_COLUMN, values);
+            db.insert(TABLE_NAME, CITY_COLUMN, values);*/
         }
 
         @Override
