@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.SimpleCursorAdapter;
 
 public class Forecast extends Activity implements View.OnClickListener {
 
+    private static final String TAG = "Forecast";
     public static Cursor showAllCursor;
     public static ListView showTableListView;
     public static SimpleCursorAdapter adapter;
@@ -35,10 +37,16 @@ public class Forecast extends Activity implements View.OnClickListener {
         showAllCursor = contentResolver.query(WeatherDbProvider.CONTENT_URI,
                 null, null, null, null, null);
 
-        while (showAllCursor.getCount() == 0) {
-            showAllCursor = getContentResolver().query(WeatherDbProvider.CONTENT_URI,
-                    null, null, null, null, null);
+        long loopLimit = MainActivity.daysNumber + WeatherDbProvider.totalRowsNumberInDB;
+        while (showAllCursor.getCount() < loopLimit) {
+            Log.i(TAG, "showAllCursor.getCount()= " + showAllCursor.getCount());
+            Log.w(TAG, "totalRowsNumberInDB= " + WeatherDbProvider.totalRowsNumberInDB);
+            Log.i(TAG, "loopLimit=" + loopLimit);
+            showAllCursor.requery();
         }
+/*
+        showAllCursor = getContentResolver().query(WeatherDbProvider.CONTENT_URI,
+                null, null, null, null, null);*/
 
 
         /*if (showAllCursor.getCount() <= 0) {

@@ -1,6 +1,7 @@
 package com.evgsoft.weather;
 
 import android.content.ContentValues;
+import android.database.DatabaseUtils;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -46,7 +47,8 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Void> {
         setContentValuesAndPopulateDB(weatherList);
 //        populateDatabase();
 
-
+        WeatherDbProvider.totalRowsNumberInDB = DatabaseUtils.queryNumEntries(
+                WeatherDbProvider.database, WeatherDbProvider.WeatherDbHelper.TABLE_NAME);
         return null;
     }
 
@@ -96,6 +98,7 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Void> {
         Gson gson = gsnBldr.create();
         Weather[] array = gson.fromJson(jsonString, Weather[].class);
         weatherList = new ArrayList<Weather>(Arrays.asList(array));
+//        WeatherDbProvider.totalRowsNumberInDB = weatherList.size();
         return weatherList;
     }
 /*

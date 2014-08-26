@@ -26,6 +26,7 @@ public class WeatherDbProvider extends ContentProvider {
             "content://com.evgsoft.weather.WeatherDbProvider/weathertable");
     private static final String TAG = "WeatherDbProvider";
     protected static SQLiteDatabase database;
+    protected static long  totalRowsNumberInDB = 0;
     static URL webServiceUrl;
     static ArrayList<Weather> weatherList;
 
@@ -160,7 +161,6 @@ public class WeatherDbProvider extends ContentProvider {
     }
 
     protected static class WeatherDbHelper extends SQLiteOpenHelper implements BaseColumns {
-
         static final String BASE_NAME = "weatherBase.db";
         static final String TABLE_NAME = "weatherTable";
         static final String ID_COLUMN = "_id";
