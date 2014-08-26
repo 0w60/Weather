@@ -5,7 +5,6 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +24,7 @@ public class Forecast extends Activity implements View.OnClickListener {
             WeatherDbProvider.WeatherDbHelper.WEATHER_CONDITION_COLUMN,
             WeatherDbProvider.WeatherDbHelper.TEMPERATURE_COLUMN};
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,43 +36,23 @@ public class Forecast extends Activity implements View.OnClickListener {
         ContentResolver contentResolver = getContentResolver();
         showAllCursor = contentResolver.query(WeatherDbProvider.CONTENT_URI,
                 null, null, null, null, null);
-
-        long loopLimit = MainActivity.daysNumber + WeatherDbProvider.totalRowsNumberInDB;
-        while (showAllCursor.getCount() < loopLimit) {
-            Log.i(TAG, "showAllCursor.getCount()= " + showAllCursor.getCount());
-            Log.w(TAG, "totalRowsNumberInDB= " + WeatherDbProvider.totalRowsNumberInDB);
-            Log.i(TAG, "loopLimit=" + loopLimit);
-            showAllCursor.requery();
-        }
-/*
-        showAllCursor = getContentResolver().query(WeatherDbProvider.CONTENT_URI,
-                null, null, null, null, null);*/
-
-
-        /*if (showAllCursor.getCount() <= 0) {
-            Intent intent = new Intent();
-            intent.setClass(getApplicationContext(), Forecast.class);
-            startActivity(intent);
-        } */
-//        showAllCursor.setNotificationUri(contentResolver, WeatherDbProvider.CONTENT_URI);
-
-        int[] toViews = {R.id.cityTxtView, R.id.dayTxtView, R.id.condtnTxtView, R.id.tempTxtView};
+        int[] toViews = {
+                R.id.cityTxtView,
+                R.id.dayTxtView,
+                R.id.condtnTxtView,
+                R.id.tempTxtView};
         adapter = new SimpleCursorAdapter(this, R.layout.activity_views_for_lst_view,
                 showAllCursor, FROM_COLUMNS, toViews, 0);
         showTableListView = (ListView) findViewById(R.id.forecastLstView);
         showTableListView.setAdapter(adapter);
-
     }
 
-    public void refreshView(View v) {
-        Intent intent = new Intent();
-        intent.setClass(getApplicationContext(), Forecast.class);
-        startActivity(intent);
-       /* showAllCursor = getContentResolver().query(WeatherDbProvider.CONTENT_URI,
-                null, null, null, null, null);
+    public static void refreshView(Cursor newCursor) {
+        showAllCursor = newCursor;
         adapter.notifyDataSetChanged();
+        adapter.changeCursor(newCursor);
         showTableListView.invalidateViews();
-        showTableListView.refreshDrawableState();*/
+        showTableListView.refreshDrawableState();
     }
 
     @Override

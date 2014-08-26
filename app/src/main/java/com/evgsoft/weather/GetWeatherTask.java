@@ -1,7 +1,7 @@
 package com.evgsoft.weather;
 
 import android.content.ContentValues;
-import android.database.DatabaseUtils;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -17,10 +17,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class GetWeatherTask extends AsyncTask<URL, Void, Void> {
+public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
 
     private static final String TAG = "GetWeatherTask";
-    static String[] fromColumns = {
+    static final String[] FROM_COLUMNS = {
+            WeatherDbProvider.WeatherDbHelper._ID,
             WeatherDbProvider.WeatherDbHelper.CITY_COLUMN,
             WeatherDbProvider.WeatherDbHelper.DAY_COLUMN,
             WeatherDbProvider.WeatherDbHelper.WEATHER_CONDITION_COLUMN,
@@ -31,48 +32,36 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Void> {
     ArrayList<Weather> weatherList;
 
     @Override
-    protected Void doInBackground(URL... url) {
-
+    protected Cursor doInBackground(URL... url) {
         webServiceUrl = url[0];
-
         Log.i(TAG, "doInBackground, webServiceUrl: " + webServiceUrl);
-
         jsonString = connectToServiceAndGetJsonString(webServiceUrl);
-
-
         weatherList = jsonStringDeserialize();
-
-        Log.i(TAG, "weatherList: " + weatherList.toString());
-
+        Log.i(TAG, "weatherList: " + weatherList);
         setContentValuesAndPopulateDB(weatherList);
-//        populateDatabase();
-
-        WeatherDbProvider.totalRowsNumberInDB = DatabaseUtils.queryNumEntries(
-                WeatherDbProvider.database, WeatherDbProvider.WeatherDbHelper.TABLE_NAME);
-        return null;
+        Cursor cursor = WeatherDbProvider.database.query(
+                WeatherDbProvider.WeatherDbHelper.TABLE_NAME, FROM_COLUMNS,
+                null, null, null, null, null);
+        return cursor;
     }
 
     private String connectToServiceAndGetJsonString(URL webServiceUrl) {
         BufferedReader inStrmReader = null;
         HttpURLConnection connection = null;
-        StringBuilder jsnStrngBldr = null;
         try {
             connection = (HttpURLConnection) webServiceUrl.openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
-
             Boolean isConnectionNull = (connection == null);
             Log.i(TAG, "isConnectionNull: " + isConnectionNull);
 
             inStrmReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            jsnStrngBldr = new StringBuilder();
+            StringBuilder fromJsnStrngBldr = new StringBuilder();
             String line;
-
             while ((line = inStrmReader.readLine()) != null) {
-                jsnStrngBldr.append(line + '\n');
+                fromJsnStrngBldr.append(line);
             }
-
-            jsonString = jsnStrngBldr.toString();
+            jsonString = fromJsnStrngBldr.toString();
             Log.i(TAG, "jsonString: " + jsonString);
 
         } catch (IOException e) {
@@ -82,7 +71,9 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Void> {
                 if (inStrmReader != null) {
                     inStrmReader.close();
                 }
-                connection.disconnect();
+                if (connection != null) {
+                    connection.disconnect();
+                }
             } catch (IOException e) {
                 Log.w(TAG, "Error while closing reader or connection", e);
             }
@@ -98,22 +89,10 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Void> {
         Gson gson = gsnBldr.create();
         Weather[] array = gson.fromJson(jsonString, Weather[].class);
         weatherList = new ArrayList<Weather>(Arrays.asList(array));
-//        WeatherDbProvider.totalRowsNumberInDB = weatherList.size();
         return weatherList;
     }
-/*
-    protected void populateDatabase() {
-        Log.i(TAG, "in populateDatabase()");
-        long rowId = WeatherDbProvider.database.insert(
-                WeatherDbProvider.WeatherDbHelper.TABLE_NAME,
-                WeatherDbProvider.WeatherDbHelper.CITY_COLUMN,
-                setContentValuesAndPopulateDB(weatherList));
-        Log.i(TAG, "populateDatabase(), rowId=" + rowId);
-    }*/
 
-    private ContentValues setContentValuesAndPopulateDB(ArrayList<Weather> list) {
-        Log.i(TAG, "in setContentValuesAndPopulateDB(ArrayList<Weather> list)");
-
+    private static void setContentValuesAndPopulateDB(ArrayList<Weather> list) {
         ContentValues values = new ContentValues();
         for (Weather w : list) {
             values.put(WeatherDbProvider.WeatherDbHelper.CITY_COLUMN, w.city);
@@ -127,16 +106,10 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Void> {
                     values);
             Log.i(TAG, "setContentValuesAndPopulateDB, rowId=" + rowId);
         }
-        return values;
     }
-/*
+
     @Override
-    protected void onPostExecute(Void v) {
-        Forecast.showAllCursor = WeatherDbProvider.database.query(
-                WeatherDbProvider.WeatherDbHelper.TABLE_NAME, fromColumns,
-                null, null, null, null, null);
-        Forecast.adapter.notifyDataSetChanged();
-        Forecast.showTableListView.invalidateViews();
-        Forecast.showTableListView.refreshDrawableState();
-    }*/
+    protected void onPostExecute(Cursor cursor) {
+        Forecast.refreshView(cursor);
+    }
 }
