@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -23,12 +22,12 @@ XML request: http://api.openweathermap.org/data/2.5/forecast/daily?q=London&mode
 
 public class WeatherDbProvider extends ContentProvider {
 
-    private static final Uri CONTENT_URI = Uri.parse(
-            "content://com.evgsoft.weather.weatherdbprovider/weathertable");
+    static final Uri CONTENT_URI = Uri.parse(
+            "content://com.evgsoft.weather.WeatherDbProvider/weathertable");
     private static final String TAG = "WeatherDbProvider";
-    private SQLiteDatabase database;
+    protected static SQLiteDatabase database;
     static URL webServiceUrl;
-    private ArrayList<Weather> weatherList;
+    static ArrayList<Weather> weatherList;
 
     public WeatherDbProvider() {
     }
@@ -36,37 +35,91 @@ public class WeatherDbProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         database = new WeatherDbHelper(getContext()).getWritableDatabase();
-        getDataFromServerToWeatherList();
-        populateDatabase();
+        boolean isDbNull = (database == null);
+        Log.i(TAG, "onCreate(): isDbNull: " + isDbNull);
         return (database != null);
     }
 
-    public void getDataFromServerToWeatherList() {
+    /*private void getDataFromServerToWeatherList() {
         try {
             String city = MainActivity.city;
             int numberOfDays = MainActivity.daysNumber;
+
+            Log.i(TAG, "getDataFromServerToWeatherList(): city: " + city + " numberOfDays: " + numberOfDays);
+
             webServiceUrl = new URL(
                     "http://api.openweathermap.org/data/2.5/forecast/daily?q=" + city + "&mode=json&units=metric&cnt=" + numberOfDays);
-            weatherList = new GetWeatherTask(webServiceUrl).doInBackground();
+
+            Log.i(TAG, "getDataFromServerToWeatherList(): webServiceUrl: " + webServiceUrl);
+
+            String jsonString = connectToServiceAndGetJsonString(webServiceUrl);
+
+            Log.i(TAG, "getDataFromServerToWeatherList(): jsonString: " + jsonString);
+
+            weatherList = jsonStringDeserialize(jsonString);
+
+            Log.i(TAG, "getDataFromServerToWeatherList(): weatherList: " + weatherList.toString());
         } catch (MalformedURLException e) {
             Log.w(TAG, "URL is incorrect", e);
         }
-    }
+    }*/
 
-    public void populateDatabase() {
-        insert (CONTENT_URI, setContentValues(weatherList));
-    }
+    /*private String connectToServiceAndGetJsonString(URL webServiceUrl) {
+        Log.i(TAG, "in connectToServiceAndGetJsonString(URL webServiceUrl)");
 
-    public ContentValues setContentValues(ArrayList<Weather> list) {
-        ContentValues values = new ContentValues();
-        for (Weather w : list) {
-            values.put(WeatherDbHelper.CITY_COLUMN, w.city);
-            values.put(WeatherDbHelper.DAY_COLUMN, w.day);
-            values.put(WeatherDbHelper.WEATHER_CONDITION_COLUMN, w.weathrCondtns);
-            values.put(WeatherDbHelper.TEMPERATURE_COLUMN, w.temperature);
+        String jsonString = null;
+        BufferedReader inStrmReader = null;
+        HttpURLConnection connection = null;
+        StringBuilder jsnStrngBldr = null;
+        try {
+            connection = (HttpURLConnection) webServiceUrl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+
+            Boolean isConnectionNull = (connection == null);
+            Log.i(TAG, "isConnectionNull: " + isConnectionNull);
+
+            inStrmReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            jsnStrngBldr = new StringBuilder();
+            String line;
+
+            while ((line = inStrmReader.readLine()) != null) {
+                jsnStrngBldr.append(line + '\n');
+            }
+
+            jsonString = jsnStrngBldr.toString();
+
+            Log.i(TAG, " before catch: jsonString: " + jsonString);
+
+        } catch (IOException e) {
+            Log.w(TAG, "Error while receiving data from server", e);
+        } finally {
+            try {
+                if (inStrmReader != null) {
+                    inStrmReader.close();
+                }
+                connection.disconnect();
+            } catch (IOException e) {
+                Log.w(TAG, "Error while closing reader or connection", e);
+            }
         }
-        return values;
+        Log.i(TAG, " jsonString: " + jsonString);
+
+        return jsonString;
     }
+
+    private ArrayList<Weather> jsonStringDeserialize(String jsonString) {
+        Log.i(TAG, "in jsonStringDeserialize(String jsonString)");
+        GsonBuilder gsnBldr = new GsonBuilder();
+        gsnBldr.registerTypeAdapter(Weather[].class, new WeatherDeserializer());
+        Gson gson = gsnBldr.create();
+        Weather[] array = gson.fromJson(jsonString, Weather[].class);
+        weatherList = new ArrayList<Weather>(Arrays.asList(array));
+        return weatherList;
+    }
+
+*/
+
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -83,22 +136,20 @@ public class WeatherDbProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        database.insert(WeatherDbHelper.TABLE_NAME, WeatherDbHelper.CITY_COLUMN, values);
-        Uri lastAddedItem = ContentUris.withAppendedId(CONTENT_URI,  values.size());
+        long lastRowId = database.insert(WeatherDbHelper.TABLE_NAME, WeatherDbHelper.CITY_COLUMN, values);
+        Uri lastAddedItem = ContentUris.withAppendedId(CONTENT_URI, lastRowId);
         return lastAddedItem;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-
-
-
-        FINISHED HERE
-
-
-        // TODO: Implement this to handle query requests from clients.
-        throw new UnsupportedOperationException("Not yet implemented");
+        Log.i(TAG, "in query(Uri uri, String[] projection, String selection,\n" +
+                "String[] selectionArgs, String sortOrder)");
+//        sortOrder = (sortOrder == null) ? WeatherDbHelper.DAY_COLUMN : sortOrder;
+        Cursor cursor = database.query(WeatherDbHelper.TABLE_NAME, projection, selection,
+                selectionArgs, null, null, sortOrder);
+        return cursor;
     }
 
     @Override
@@ -108,7 +159,7 @@ public class WeatherDbProvider extends ContentProvider {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    protected class WeatherDbHelper extends SQLiteOpenHelper implements BaseColumns {
+    protected static class WeatherDbHelper extends SQLiteOpenHelper implements BaseColumns {
 
         static final String BASE_NAME = "weatherBase.db";
         static final String TABLE_NAME = "weatherTable";

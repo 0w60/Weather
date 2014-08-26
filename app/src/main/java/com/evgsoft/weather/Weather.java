@@ -22,4 +22,28 @@ class Weather {
                 ", weathrCondtns='" + weathrCondtns + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Weather)) return false;
+
+        Weather weather = (Weather) o;
+
+        if (!city.equals(weather.city)) return false;
+        if (!day.equals(weather.day)) return false;
+        if (!temperature.equals(weather.temperature)) return false;
+        if (!weathrCondtns.equals(weather.weathrCondtns)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = city.hashCode();
+        result = 31 * result + day.hashCode();
+        result = 31 * result + temperature.hashCode();
+        result = 31 * result + weathrCondtns.hashCode();
+        return result;
+    }
 }

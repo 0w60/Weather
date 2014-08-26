@@ -12,15 +12,14 @@ import java.util.Date;
 
 class WeatherDeserializer implements JsonDeserializer<Weather[]> {
 
+    static final String[] DAYS = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
     Weather[] weatherArray;
 
     @Override
     public Weather[] deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         String city = null;
-        String day = null;
         String temperature = null;
         String weatherCondtns = null;
-        String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         JsonObject jObject = json.getAsJsonObject();
         city = jObject.get("city").getAsJsonObject().get("name").getAsString();
         JsonArray listJArray = jObject.get("list").getAsJsonArray();
@@ -36,7 +35,7 @@ class WeatherDeserializer implements JsonDeserializer<Weather[]> {
             JsonArray weatherJArray = jElem.getAsJsonObject().get("weather").getAsJsonArray();
             weatherCondtns = weatherJArray.get(0).getAsJsonObject().get("description").getAsString();
 
-            weatherArray[index++] = new Weather(city, days[dayNumber], temperature, weatherCondtns);
+            weatherArray[index++] = new Weather(city, DAYS[dayNumber], temperature, weatherCondtns);
         }
         return weatherArray;
     }

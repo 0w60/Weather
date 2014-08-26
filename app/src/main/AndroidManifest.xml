@@ -4,6 +4,7 @@
 
     <application
         android:allowBackup="true"
+        android:enabled="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
@@ -19,9 +20,10 @@
 
         <provider
             android:name=".WeatherDbProvider"
-            android:authorities="content://com.evgsoft.weather.weatherdbprovider/weathertable"
+            android:authorities="com.evgsoft.weather.WeatherDbProvider"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"
+            android:syncable="true"/>
 
         <activity
             android:name=".Forecast"
