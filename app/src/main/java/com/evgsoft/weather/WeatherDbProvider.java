@@ -37,8 +37,8 @@ public class WeatherDbProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // Implement this to handle requests to delete one or more rows.
-        throw new UnsupportedOperationException("Not yet implemented");
+        int numberOfDeletedRows = database.delete(WeatherDbHelper.TABLE_NAME, selection, selectionArgs);
+        return numberOfDeletedRows;
     }
 
     @Override
@@ -58,8 +58,6 @@ public class WeatherDbProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        Log.i(TAG, "in query(Uri uri, String[] projection, String selection,\n" +
-                "String[] selectionArgs, String sortOrder)");
         Cursor cursor = database.query(WeatherDbHelper.TABLE_NAME, projection, selection,
                 selectionArgs, null, null, sortOrder);
         return cursor;

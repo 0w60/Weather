@@ -1,6 +1,10 @@
 package com.evgsoft.weather;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +23,48 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected static String city;
     protected static int daysNumber;
     URL webServiceUrl;
+
+    // The authority for the sync adapter's content provider
+    public static final String AUTHORITY = "com.evgsoft.weather";
+    // An account type, in the form of a domain name
+    public static final String ACCOUNT_TYPE = "com.evgsoft.weather.dbsyncadapter";
+    // The account name
+    public static final String ACCOUNT = "dummyaccount";
+
+    Account account;
+    // Sync interval constants
+    /*public static final long MILLISECONDS_PER_SECOND = 1000L;
+    public static final long SECONDS_PER_MINUTE = 60L;
+    public static final long SYNC_INTERVAL_IN_MINUTES = 60L;*/
+    public static final long SYNC_INTERVAL_IN_SECONDS = 30L;
+
+    ContentResolver mResolver;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Create the dummy account
+        account = CreateSyncAccount(this);
+
+        boolean isMaccountNull = (account == null);
+        Log.i(TAG, "-----isMaccountNull:" + isMaccountNull);
+
+        mResolver = getContentResolver();
+
+        ContentResolver.setIsSyncable(account, AUTHORITY, 1);
+        ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
+        /*
+         * Turn on periodic syncing
+         */
+        ContentResolver.addPeriodicSync(
+                account,
+                AUTHORITY,
+                new Bundle(),
+                SYNC_INTERVAL_IN_SECONDS);
+    }
 
     @Override
     public void onClick(View v) {
@@ -41,10 +87,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
         startActivity(intent);
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    /**
+     * Create a new dummy account for the sync adapter
+     *
+     * @param context The application context
+     */
+    public static Account CreateSyncAccount(Context context) {
+        Account newAccount = null;
+        try {
+            newAccount = new Account(
+                    ACCOUNT, ACCOUNT_TYPE);
+            AccountManager accountManager =
+                    (AccountManager) context.getSystemService(
+                            ACCOUNT_SERVICE);
+            accountManager.addAccountExplicitly(newAccount, null, null);
+        } catch (Exception e) {
+            Log.w(TAG, "Dummy account creation failed", e);
+        }
+        return newAccount;
     }
 
     @Override

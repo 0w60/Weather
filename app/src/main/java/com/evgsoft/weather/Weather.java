@@ -1,10 +1,21 @@
 package com.evgsoft.weather;
 
 class Weather {
+    static final String[] DAYS = {
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"};
     String city;
     String day;
     String temperature;
     String weathrCondtns;
+
+    Weather() {
+    }
 
     Weather(String city, String day, String temperature, String weathrCondtns) {
         this.city = city;
@@ -29,6 +40,7 @@ class Weather {
         if (!(o instanceof Weather)) return false;
 
         Weather weather = (Weather) o;
+        if (day.equals(weather.day)) return true;
 
         if (!city.equals(weather.city)) return false;
         if (!day.equals(weather.day)) return false;
@@ -40,6 +52,9 @@ class Weather {
 
     @Override
     public int hashCode() {
+        if ((day == null) || (temperature == null) || (weathrCondtns == null)) {
+            return 0;
+        }
         int result = city.hashCode();
         result = 31 * result + day.hashCode();
         result = 31 * result + temperature.hashCode();

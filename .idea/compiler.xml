@@ -18,7 +18,10 @@
         <processorPath useClasspath="true" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="1.8" />
+    <bytecodeTargetLevel target="1.8">
+      <module name="app" target="" />
+      <module name="Weather" target="" />
+    </bytecodeTargetLevel>
   </component>
 </project>
 

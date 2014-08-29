@@ -3,12 +3,56 @@
     package="com.evgsoft.weather">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!--Allows  app to read the current sync adapter settings.
+    For example, you need this permission in order to call getIsSyncable()-->
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+
+    <!--Allows app to control sync adapter settings.
+    We need this permission in order to set periodic sync adapter runs using addPeriodicSync()
+     This permission is not required to call requestSync()-->
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+
+    <!--Allows to use the authenticator component-->
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+
     <application
         android:allowBackup="true"
         android:enabled="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+
+        <!--The attribute android:process=":sync" tells the system
+        to run the Service in a global shared process named sync.-->
+        <service
+            android:name=".WeatherSyncService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+
+        <!-- <service
+             android:name=".AuthenticatorService"
+             android:enabled="true"
+             android:exported="true" >
+         </service>-->
+
+        <service android:name=".AuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
@@ -19,19 +63,21 @@
             </intent-filter>
         </activity>
 
+        <!--android:authorities="com.evgsoft.weather.WeatherDbProvider"-->
+
         <provider
             android:name=".WeatherDbProvider"
-            android:authorities="com.evgsoft.weather.WeatherDbProvider"
+            android:authorities="com.evgsoft.weather"
             android:enabled="true"
             android:exported="true"
             android:syncable="true" />
 
         <activity
             android:name=".Forecast"
-            android:label="@string/title_activity_forecast"></activity>
+            android:label="@string/title_activity_forecast" />
         <activity
             android:name=".ViewsForLstView"
-            android:label="@string/title_activity_views_for_lst_view"></activity>
+            android:label="@string/title_activity_views_for_lst_view" />
     </application>
 
 
