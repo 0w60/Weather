@@ -32,10 +32,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public static final String ACCOUNT = "dummyaccount";
 
     Account account;
-    // Sync interval constants
-    /*public static final long MILLISECONDS_PER_SECOND = 1000L;
-    public static final long SECONDS_PER_MINUTE = 60L;
-    public static final long SYNC_INTERVAL_IN_MINUTES = 60L;*/
+    // Sync interval
     public static final long SYNC_INTERVAL_IN_SECONDS = 30L;
 
     ContentResolver mResolver;
@@ -101,7 +98,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     (AccountManager) context.getSystemService(
                             ACCOUNT_SERVICE);
             accountManager.addAccountExplicitly(newAccount, null, null);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             Log.w(TAG, "Dummy account creation failed", e);
         }
         return newAccount;

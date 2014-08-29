@@ -33,8 +33,7 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = "DbSyncAdapter";
     static final Uri CONTENT_URI = Uri.parse(
             "content://com.evgsoft.weather.WeatherDbProvider/weathertable");
-    static final String TABLE_NAME = "weatherTable";
-    static final String ID_COLUMN = "_id";
+
     static final String CITY_COLUMN = "city";
     static final String DAY_COLUMN = "day";
     static final String WEATHER_CONDITION_COLUMN = "weatherCondition";
@@ -52,21 +51,15 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
     String temperature;
     XmlPullParserFactory factory;
     XmlPullParser parser;
-    private String country = "country";
-    private String pressure = "pressure";
-    ArrayList<Weather> weathers;
 
     public DbSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         contentResolver = context.getContentResolver();
-
-        Log.i(TAG, "IN THE CONSTRUCTOR");
     }
 
     public DbSyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
         contentResolver = context.getContentResolver();
-        Log.i(TAG, "IN THE CONSTRUCTOR");
     }
 
     @Override
@@ -74,31 +67,20 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         setExistingCitiesCursor(provider);
         setCitiesInBaseSet();
         setUrls();
-        getDataFromServer(urls, provider);
-
-
-        Log.i(TAG, "-----onPerformSync()-----");
+        getDataFromServerAndPopulateDB(urls, provider);
     }
 
-    void setExistingCitiesCursor(ContentProviderClient provider) {
+    private void setExistingCitiesCursor(ContentProviderClient provider) {
         try {
             String[] projection = {CITY_COLUMN};
             existingCitiesCursor = provider.query(CONTENT_URI,
                     projection, null, null, null, null);
-            //test
-            ArrayList<String> testList = new ArrayList<>();
-            int cityColumnIndex = existingCitiesCursor.getColumnIndex(CITY_COLUMN);
-            existingCitiesCursor.moveToFirst();
-            while (existingCitiesCursor.moveToNext()) {
-                testList.add(existingCitiesCursor.getString(cityColumnIndex));
-            }
-            Log.i(TAG, "in setExistingCitiesCursor: \n testList: " + testList);
         } catch (RemoteException e) {
             Log.w(TAG, "Can't get city names from CONTENT_URI", e);
         }
     }
 
-    void setCitiesInBaseSet() {
+   private void setCitiesInBaseSet() {
         citiesInBaseSet = new HashSet(existingCitiesCursor.getCount());
         int cityColumnIndex = existingCitiesCursor.getColumnIndex(CITY_COLUMN);
         existingCitiesCursor.moveToFirst();
@@ -108,13 +90,12 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, "-----citiesInBaseSet: " + citiesInBaseSet);
     }
 
-    void setUrls() {
+    private void setUrls() {
         int daysNumber = 3;
         try {
             urls = new URL[citiesInBaseSet.size()];
             int index = 0;
             for (String cityUrl : citiesInBaseSet) {
-                Log.w(TAG, "setUrls(): cityUrl: " + cityUrl);
                 String baseUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?q=" +
                         cityUrl + "&mode=xml&units=metric&cnt=" + daysNumber;
                 urls[index++] = new URL(baseUrl);
@@ -124,7 +105,7 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    void getDataFromServer(URL[] links, ContentProviderClient provider) {
+   private void getDataFromServerAndPopulateDB(URL[] links, ContentProviderClient provider) {
         for (URL link : links) {
             String xmlString = connectToServerAndGetXml(link);
             weatherList = parse(xmlString);
@@ -132,7 +113,7 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    String connectToServerAndGetXml(URL url) {
+   private String connectToServerAndGetXml(URL url) {
         String xmlString = null;
         BufferedReader inStrmReader = null;
         HttpURLConnection connection = null;
@@ -149,7 +130,7 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
                 xmlStrngBldr.append(line);
             }
             xmlString = xmlStrngBldr.toString();
-            Log.i(TAG, "jsnString: " + xmlString);
+            Log.i(TAG, "xmlString: " + xmlString);
 
         } catch (IOException e) {
             Log.w(TAG, "Error while receiving data from server", e);
@@ -168,16 +149,7 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         return xmlString;
     }
 
- /*   private Weather[] jsonStringDeserialize(String jsonString) {
-        GsonBuilder gsnBldr = new GsonBuilder();
-        gsnBldr.registerTypeAdapter(Weather[].class, new WeatherDeserializer());
-        Gson gson = gsnBldr.create();
-        Weather[] weatherArray = gson.fromJson(jsonString, Weather[].class);
-//        weatherList = new ArrayList<Weather>(Arrays.asList(weatherArray));
-        return weatherArray;
-    }*/
-
-    public ArrayList<Weather> parse(String xmlString) {
+    private ArrayList<Weather> parse(String xmlString) {
         StringReader xmlReader = new StringReader(xmlString);
         ArrayList<Weather> parsedList = null;
         try {
@@ -188,17 +160,15 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
             parser.nextTag();
 
             parsedList = parseXML(parser);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
+        } catch (IOException | XmlPullParserException e) {
+            Log.w(TAG, "Failed to parse the XML string", e);
         } finally {
             xmlReader.close();
         }
         return parsedList;
     }
 
-    public ArrayList<Weather> parseXML(XmlPullParser parsr) {
+   private ArrayList<Weather> parseXML(XmlPullParser parsr) {
         ArrayList<Weather> weathers = new ArrayList<>();
         String wDay = null;
         String wConds = null;
@@ -254,12 +224,10 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             }
             weathers.add(new Weather(city, day, temperature, weatherCondtns));
-        } catch (XmlPullParserException e1) {
-            e1.printStackTrace();
-        } catch (IOException e1) {
-            e1.printStackTrace();
+        } catch (XmlPullParserException | IOException e) {
+            Log.w(TAG, "Failed to parse the XML string", e);
         }
-        return weathers;
+       return weathers;
     }
 
 
@@ -281,7 +249,7 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    void deleteOldEntriesFromDB(ContentProviderClient provider) {
+    private void deleteOldEntriesFromDB(ContentProviderClient provider) {
         try {
             provider.delete(CONTENT_URI, "1", null);
         } catch (RemoteException e) {

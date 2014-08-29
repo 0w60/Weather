@@ -1,14 +1,7 @@
 package com.evgsoft.weather;
 
 class Weather {
-    static final String[] DAYS = {
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"};
+
     String city;
     String day;
     String temperature;

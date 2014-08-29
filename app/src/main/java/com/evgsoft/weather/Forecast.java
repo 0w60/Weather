@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,10 +16,10 @@ import android.widget.SimpleCursorAdapter;
 public class Forecast extends Activity implements View.OnClickListener {
 
     private static final String TAG = "Forecast";
-    public static Cursor showAllCursor;
-    public static ListView showTableListView;
-    public static SimpleCursorAdapter adapter;
-    public static final String[] FROM_COLUMNS = {
+    protected static Cursor showAllCursor;
+    protected static ListView showTableListView;
+    protected static SimpleCursorAdapter adapter;
+    protected static final String[] FROM_COLUMNS = {
             WeatherDbProvider.WeatherDbHelper.CITY_COLUMN,
             WeatherDbProvider.WeatherDbHelper.DAY_COLUMN,
             WeatherDbProvider.WeatherDbHelper.WEATHER_CONDITION_COLUMN,
@@ -53,6 +54,7 @@ public class Forecast extends Activity implements View.OnClickListener {
         adapter.changeCursor(newCursor);
         showTableListView.invalidateViews();
         showTableListView.refreshDrawableState();
+        Log.i(TAG, "View refreshed by background thread");
     }
 
     @Override

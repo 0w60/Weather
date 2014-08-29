@@ -3,7 +3,6 @@ package com.evgsoft.weather;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.util.Log;
 
 public class WeatherSyncService extends Service {
 
@@ -19,14 +18,9 @@ public class WeatherSyncService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "-----In the onCreate()");
-
         synchronized (dbSyncAdapterLock) {
             if (dbSyncAdapter == null) {
                 dbSyncAdapter = new DbSyncAdapter(getApplicationContext(), true);
-
-                boolean isDbSyncAdapterNull = (dbSyncAdapter == null);
-                Log.i(TAG, "-----isDbSyncAdapterNull: " + isDbSyncAdapterNull);
             }
         }
     }

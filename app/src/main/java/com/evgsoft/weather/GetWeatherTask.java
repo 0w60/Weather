@@ -79,7 +79,6 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
             }
         }
         Log.i(TAG, " jsonString: " + jsonString);
-
         return jsonString;
     }
 
@@ -88,7 +87,7 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
         gsnBldr.registerTypeAdapter(Weather[].class, new WeatherDeserializer());
         Gson gson = gsnBldr.create();
         Weather[] array = gson.fromJson(jsonString, Weather[].class);
-        weatherList = new ArrayList<Weather>(Arrays.asList(array));
+        weatherList = new ArrayList<>(Arrays.asList(array));
         return weatherList;
     }
 
@@ -104,7 +103,6 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
                     WeatherDbProvider.WeatherDbHelper.TABLE_NAME,
                     WeatherDbProvider.WeatherDbHelper.CITY_COLUMN,
                     values);
-            Log.i(TAG, "setContentValuesAndPopulateDB, rowId=" + rowId);
         }
     }
 
