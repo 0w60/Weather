@@ -25,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 
@@ -38,14 +39,14 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
     static final String DAY_COLUMN = "day";
     static final String WEATHER_CONDITION_COLUMN = "weatherCondition";
     static final String TEMPERATURE_COLUMN = "temperature";
-    static Cursor existingCitiesCursor;
-    static HashSet<String> citiesInBaseSet;
+    Cursor existingCitiesCursor;
+    HashSet<String> citiesInBaseSet;
     String city;
 
 
     ContentResolver contentResolver;
-    static URL[] urls;
-    static ArrayList<Weather> weatherList;
+    URL[] urls;
+    ArrayList<Weather> weatherList;
     String day;
     String weatherCondtns;
     String temperature;
@@ -80,18 +81,22 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-   private void setCitiesInBaseSet() {
-        citiesInBaseSet = new HashSet(existingCitiesCursor.getCount());
+    private void setCitiesInBaseSet() {
+        int size = existingCitiesCursor.getCount();
+        citiesInBaseSet = new HashSet<>(size);
         int cityColumnIndex = existingCitiesCursor.getColumnIndex(CITY_COLUMN);
-        existingCitiesCursor.moveToFirst();
-        while (existingCitiesCursor.moveToNext()) {
-            citiesInBaseSet.add(existingCitiesCursor.getString(cityColumnIndex));
+        Log.w(TAG, "existingCitiesCursor.getCount(): " + existingCitiesCursor.getCount());
+        if (existingCitiesCursor.moveToFirst()) {
+            do {
+                citiesInBaseSet.add(existingCitiesCursor.getString(cityColumnIndex));
+            } while (existingCitiesCursor.moveToNext());
         }
+        citiesInBaseSet.remove(null);
         Log.i(TAG, "-----citiesInBaseSet: " + citiesInBaseSet);
     }
 
     private void setUrls() {
-        int daysNumber = 3;
+        int daysNumber = 1;
         try {
             urls = new URL[citiesInBaseSet.size()];
             int index = 0;
@@ -100,20 +105,22 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
                         cityUrl + "&mode=xml&units=metric&cnt=" + daysNumber;
                 urls[index++] = new URL(baseUrl);
             }
+            Log.i("-----urls: \n", Arrays.toString(urls));
         } catch (MalformedURLException e) {
-            Log.w(TAG, "Bad URL", e);
+            Log.e(TAG, "Bad URL", e);
         }
     }
 
-   private void getDataFromServerAndPopulateDB(URL[] links, ContentProviderClient provider) {
+    private void getDataFromServerAndPopulateDB(URL[] links, ContentProviderClient provider) {
         for (URL link : links) {
             String xmlString = connectToServerAndGetXml(link);
             weatherList = parse(xmlString);
+            deleteOldEntriesFromDB(provider);
             setContentValuesAndPopulateDB(weatherList, provider);
         }
     }
 
-   private String connectToServerAndGetXml(URL url) {
+    private String connectToServerAndGetXml(URL url) {
         String xmlString = null;
         BufferedReader inStrmReader = null;
         HttpURLConnection connection = null;
@@ -163,12 +170,14 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         } catch (IOException | XmlPullParserException e) {
             Log.w(TAG, "Failed to parse the XML string", e);
         } finally {
-            xmlReader.close();
+            if (xmlReader != null) {
+                xmlReader.close();
+            }
         }
         return parsedList;
     }
 
-   private ArrayList<Weather> parseXML(XmlPullParser parsr) {
+    private ArrayList<Weather> parseXML(XmlPullParser parsr) {
         ArrayList<Weather> weathers = new ArrayList<>();
         String wDay = null;
         String wConds = null;
@@ -227,15 +236,13 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         } catch (XmlPullParserException | IOException e) {
             Log.w(TAG, "Failed to parse the XML string", e);
         }
-       return weathers;
+        return weathers;
     }
 
 
     private void setContentValuesAndPopulateDB(ArrayList<Weather> list, ContentProviderClient provider) {
         try {
-            if (list.size() > 0) {
-                deleteOldEntriesFromDB(provider);
-            }
+//
             ContentValues values = new ContentValues();
             for (Weather w : list) {
                 values.put(CITY_COLUMN, w.city);
@@ -251,7 +258,7 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void deleteOldEntriesFromDB(ContentProviderClient provider) {
         try {
-            provider.delete(CONTENT_URI, "1", null);
+            provider.delete(CONTENT_URI, null, null);
         } catch (RemoteException e) {
             Log.w(TAG, "Can't delete all rows from database via CONTENT_URI", e);
         }

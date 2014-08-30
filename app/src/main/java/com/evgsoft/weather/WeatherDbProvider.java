@@ -4,7 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -56,9 +56,9 @@ public class WeatherDbProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection,
+    public SQLiteCursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        Cursor cursor = database.query(WeatherDbHelper.TABLE_NAME, projection, selection,
+        SQLiteCursor cursor = (SQLiteCursor) database.query(WeatherDbHelper.TABLE_NAME, projection, selection,
                 selectionArgs, null, null, sortOrder);
         return cursor;
     }

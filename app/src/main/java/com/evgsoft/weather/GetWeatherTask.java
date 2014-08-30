@@ -103,6 +103,8 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
                     WeatherDbProvider.WeatherDbHelper.TABLE_NAME,
                     WeatherDbProvider.WeatherDbHelper.CITY_COLUMN,
                     values);
+
+            Log.w(TAG, "-----Number of rows inserted: " + rowId);
         }
     }
 

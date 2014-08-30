@@ -37,13 +37,6 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
-
-        <!-- <service
-             android:name=".AuthenticatorService"
-             android:enabled="true"
-             android:exported="true" >
-         </service>-->
-
         <service android:name=".AuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -62,8 +55,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!--android:authorities="com.evgsoft.weather.WeatherDbProvider"-->
 
         <provider
             android:name=".WeatherDbProvider"
