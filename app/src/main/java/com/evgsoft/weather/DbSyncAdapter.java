@@ -115,7 +115,6 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
         for (URL link : links) {
             String xmlString = connectToServerAndGetXml(link);
             weatherList = parse(xmlString);
-            deleteOldEntriesFromDB(provider);
             setContentValuesAndPopulateDB(weatherList, provider);
         }
     }
@@ -242,7 +241,6 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void setContentValuesAndPopulateDB(ArrayList<Weather> list, ContentProviderClient provider) {
         try {
-//
             ContentValues values = new ContentValues();
             for (Weather w : list) {
                 values.put(CITY_COLUMN, w.city);
