@@ -96,7 +96,7 @@ public class DbSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void setUrls() {
-        int daysNumber = 1;
+        int daysNumber = 3;
         try {
             urls = new URL[citiesInBaseSet.size()];
             int index = 0;
