@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.evgsoft.weather">
+    package="cn.weather">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!--Allows  app to read the current sync adapter settings.
@@ -58,7 +58,7 @@
 
         <provider
             android:name=".WeatherDbProvider"
-            android:authorities="com.evgsoft.weather"
+            android:authorities="cn.weather"
             android:enabled="true"
             android:exported="true"
             android:syncable="true" />
