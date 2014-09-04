@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
-    android:contentAuthority="cn.weather"
+    android:contentAuthority="cn.weather.WeatherDbProvider"
     android:accountType="cn.weather.dbsyncadapter"
     android:userVisible="false"
     android:supportsUploading="false"
     android:allowParallelSyncs="false"
     android:isAlwaysSyncable="true" />
+
+    <!--android:contentAuthority="cn.weather.WeatherDbProvider"
+    Must be the same as in AndroidManifest.xml and in MainActivity.java-->

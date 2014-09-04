@@ -16,10 +16,10 @@ import android.widget.SimpleCursorAdapter;
 public class Forecast extends Activity implements View.OnClickListener {
 
     private static final String TAG = "Forecast";
-    protected static Cursor showAllCursor;
-    protected static ListView showTableListView;
-    protected static SimpleCursorAdapter adapter;
-    protected static final String[] FROM_COLUMNS = {
+    static Cursor showAllCursor;
+    static ListView showTableListView;
+    static SimpleCursorAdapter adapter;
+    static final String[] FROM_COLUMNS = {
             WeatherDbProvider.WeatherDbHelper.CITY_COLUMN,
             WeatherDbProvider.WeatherDbHelper.DAY_COLUMN,
             WeatherDbProvider.WeatherDbHelper.WEATHER_CONDITION_COLUMN,
@@ -33,7 +33,7 @@ public class Forecast extends Activity implements View.OnClickListener {
         showForecast();
     }
 
-    protected void showForecast() {
+    void showForecast() {
         ContentResolver contentResolver = getContentResolver();
         showAllCursor = contentResolver.query(WeatherDbProvider.CONTENT_URI,
                 null, null, null, null, null);
@@ -48,7 +48,7 @@ public class Forecast extends Activity implements View.OnClickListener {
         showTableListView.setAdapter(adapter);
     }
 
-    public static void refreshView(Cursor newCursor) {
+    static void refreshView(Cursor newCursor) {
         showAllCursor = newCursor;
         adapter.notifyDataSetChanged();
         adapter.changeCursor(newCursor);

@@ -24,10 +24,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected static int daysNumber;
     URL webServiceUrl;
 
-    // The authority for the sync adapter's content provider
-    public static final String AUTHORITY = "cn.weather";
+    /*The authority for the sync adapter's content provider.
+    Must be the same as in AndroidManifest.xml and in xml/syncadapter.xml. */
+    public static final String AUTHORITY = "cn.weather.WeatherDbProvider";
+
     // An account type, in the form of a domain name
     public static final String ACCOUNT_TYPE = "cn.weather.dbsyncadapter";
+
     // The account name
     public static final String ACCOUNT = "dummyaccount";
 
@@ -75,7 +78,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             webServiceUrl = new URL(
                     "http://api.openweathermap.org/data/2.5/forecast/daily?q=" + city + "&mode=json&units=metric&cnt=" + daysNumber);
         } catch (MalformedURLException e) {
-            Log.w(TAG, "Bad URL", e);
+            Log.e(TAG, "Bad URL", e);
         }
         new GetWeatherTask().execute(webServiceUrl);
 
@@ -89,7 +92,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
      *
      * @param context The application context
      */
-    public static Account CreateSyncAccount(Context context) {
+    static Account CreateSyncAccount(Context context) {
         Account newAccount = null;
         try {
             newAccount = new Account(
@@ -99,7 +102,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             ACCOUNT_SERVICE);
             accountManager.addAccountExplicitly(newAccount, null, null);
         } catch (RuntimeException e) {
-            Log.w(TAG, "Dummy account creation failed", e);
+            Log.e(TAG, "Dummy account creation failed", e);
         }
         return newAccount;
     }

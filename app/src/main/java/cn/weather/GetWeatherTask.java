@@ -45,7 +45,7 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
         return cursor;
     }
 
-    private String connectToServiceAndGetJsonString(URL webServiceUrl) {
+    String connectToServiceAndGetJsonString(URL webServiceUrl) {
         BufferedReader inStrmReader = null;
         HttpURLConnection connection = null;
         try {
@@ -82,7 +82,7 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
         return jsonString;
     }
 
-    private ArrayList<Weather> jsonStringDeserialize() {
+    ArrayList<Weather> jsonStringDeserialize() {
         GsonBuilder gsnBldr = new GsonBuilder();
         gsnBldr.registerTypeAdapter(Weather[].class, new WeatherDeserializer());
         Gson gson = gsnBldr.create();
@@ -91,7 +91,7 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
         return weatherList;
     }
 
-    private static void setContentValuesAndPopulateDB(ArrayList<Weather> list) {
+    static void setContentValuesAndPopulateDB(ArrayList<Weather> list) {
         ContentValues values = new ContentValues();
         for (Weather w : list) {
             values.put(WeatherDbProvider.WeatherDbHelper.CITY_COLUMN, w.city);

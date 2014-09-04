@@ -6,7 +6,7 @@ import android.os.IBinder;
 
 public class WeatherSyncService extends Service {
 
-    private static final String TAG = "WeatherSyncServic";
+    private static final String TAG = "WeatherSyncService";
     private static DbSyncAdapter dbSyncAdapter;
 
     // Object to use as a thread-safe lock

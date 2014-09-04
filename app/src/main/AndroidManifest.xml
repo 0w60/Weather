@@ -25,7 +25,7 @@
         <!--The attribute android:process=":sync" tells the system
         to run the Service in a global shared process named sync.-->
         <service
-            android:name=".WeatherSyncService"
+            android:name="cn.weather.WeatherSyncService"
             android:enabled="true"
             android:exported="true"
             android:process=":sync">
@@ -37,7 +37,7 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <service android:name=".AuthenticatorService">
+        <service android:name="cn.weather.AuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -47,27 +47,26 @@
         </service>
 
         <activity
-            android:name=".MainActivity"
+            android:name="cn.weather.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <provider
             android:name=".WeatherDbProvider"
-            android:authorities="cn.weather"
+            android:authorities="cn.weather.WeatherDbProvider"
             android:enabled="true"
             android:exported="true"
             android:syncable="true" />
 
         <activity
-            android:name=".Forecast"
+            android:name="cn.weather.Forecast"
             android:label="@string/title_activity_forecast" />
         <activity
-            android:name=".ViewsForLstView"
+            android:name="cn.weather.ViewsForLstView"
             android:label="@string/title_activity_views_for_lst_view" />
     </application>
 

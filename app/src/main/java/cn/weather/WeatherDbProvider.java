@@ -11,12 +11,6 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-/*
-JSON request: http://api.openweathermap.org/data/2.5/forecast/daily?q=Kiev&mode=json&units=metric&cnt=7
-XML request: http://api.openweathermap.org/data/2.5/forecast/daily?q=London&mode=xml&units=metric&cnt=7
-*/
-
-
 public class WeatherDbProvider extends ContentProvider {
 
     static final Uri CONTENT_URI = Uri.parse(
