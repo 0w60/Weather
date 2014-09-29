@@ -20,9 +20,6 @@ import java.net.URL;
 public class MainActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG = "MainActivity";
-    protected static String city;
-    protected static int daysNumber;
-    URL webServiceUrl;
 
     /*The authority for the sync adapter's content provider.
     Must be the same as in AndroidManifest.xml and in xml/syncadapter.xml. */
@@ -38,8 +35,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     // Sync interval
     public static final long SYNC_INTERVAL_IN_SECONDS = 30L;
 
-    ContentResolver mResolver;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,16 +44,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
         // Create the dummy account
         account = CreateSyncAccount(this);
 
-        boolean isMaccountNull = (account == null);
-        Log.i(TAG, "-----isMaccountNull:" + isMaccountNull);
-
-        mResolver = getContentResolver();
+        boolean isAccountNull = (account == null);
+        Log.i(TAG, "isAccountNull: " + isAccountNull);
 
         ContentResolver.setIsSyncable(account, AUTHORITY, 1);
         ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
-        /*
-         * Turn on periodic syncing
-         */
+
+        // Turn on periodic syncing
         ContentResolver.addPeriodicSync(
                 account,
                 AUTHORITY,
@@ -69,28 +61,26 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         EditText cityEdtTxt = (EditText) findViewById(R.id.cityEdtTxt);
-        city = cityEdtTxt.getText().toString();
+        String city = cityEdtTxt.getText().toString();
 
         EditText daysNumberEdtTxt = (EditText) findViewById(R.id.daysNumberEdtTxt);
-        daysNumber = Integer.parseInt(daysNumberEdtTxt.getText().toString());
+        int daysNumber = Integer.parseInt(daysNumberEdtTxt.getText().toString());
 
+        URL webServiceUrl = null;
         try {
             webServiceUrl = new URL(
                     "http://api.openweathermap.org/data/2.5/forecast/daily?q=" + city + "&mode=json&units=metric&cnt=" + daysNumber);
         } catch (MalformedURLException e) {
             Log.e(TAG, "Bad URL", e);
         }
-        new GetWeatherTask().execute(webServiceUrl);
+        new GetWeatherTask(this).execute(webServiceUrl);
 
-        Intent intent = new Intent();
-        intent.setClass(getApplicationContext(), Forecast.class);
+        Intent intent = new Intent(this, Forecast.class);
         startActivity(intent);
     }
 
     /**
      * Create a new dummy account for the sync adapter
-     *
-     * @param context The application context
      */
     static Account CreateSyncAccount(Context context) {
         Account newAccount = null;
@@ -121,5 +111,4 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         return super.onOptionsItemSelected(item);
     }
-
 }

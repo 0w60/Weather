@@ -3,6 +3,7 @@ package cn.weather;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 public class AuthenticatorService extends Service {
 
@@ -17,6 +18,8 @@ public class AuthenticatorService extends Service {
     public void onCreate() {
         // Create a new authenticator object
         mAuthenticator = new Authenticator(this);
+
+        Log.i(TAG, "onCreate()");
     }
 
 

@@ -3,6 +3,7 @@ package cn.weather;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 public class WeatherSyncService extends Service {
 
@@ -21,6 +22,8 @@ public class WeatherSyncService extends Service {
         synchronized (dbSyncAdapterLock) {
             if (dbSyncAdapter == null) {
                 dbSyncAdapter = new DbSyncAdapter(getApplicationContext(), true);
+
+                Log.i(TAG, "onCreate()");
             }
         }
     }

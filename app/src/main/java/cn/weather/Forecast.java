@@ -15,7 +15,7 @@ import android.widget.SimpleCursorAdapter;
 
 public class Forecast extends Activity implements View.OnClickListener {
 
-    private static final String TAG = "Forecast";
+    private static final String TAG = "Forecast activity";
     static Cursor showAllCursor;
     static ListView showTableListView;
     static SimpleCursorAdapter adapter;
@@ -54,8 +54,15 @@ public class Forecast extends Activity implements View.OnClickListener {
         adapter.changeCursor(newCursor);
         showTableListView.invalidateViews();
         showTableListView.refreshDrawableState();
-        Log.i(TAG, "View refreshed by background thread");
+        Log.i(TAG, "View refreshed");
     }
+
+    @Override
+    public void onClick(View v) {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,10 +79,5 @@ public class Forecast extends Activity implements View.OnClickListener {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onClick(View v) {
-        Intent intent = new Intent();
-        intent.setClass(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
-    }
+
 }

@@ -1,6 +1,8 @@
 package cn.weather;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -26,34 +28,33 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
             WeatherDbProvider.WeatherDbHelper.DAY_COLUMN,
             WeatherDbProvider.WeatherDbHelper.WEATHER_CONDITION_COLUMN,
             WeatherDbProvider.WeatherDbHelper.TEMPERATURE_COLUMN};
+    ContentResolver contentResolver;
 
-    URL webServiceUrl;
-    String jsonString;
-    ArrayList<Weather> weatherList;
+    public GetWeatherTask(Context context) {
+        contentResolver = context.getContentResolver();
+    }
 
     @Override
     protected Cursor doInBackground(URL... url) {
-        webServiceUrl = url[0];
-        Log.i(TAG, "doInBackground, webServiceUrl: " + webServiceUrl);
-        jsonString = connectToServiceAndGetJsonString(webServiceUrl);
-        weatherList = jsonStringDeserialize();
-        Log.i(TAG, "weatherList: " + weatherList);
+        URL webServiceUrl = url[0];
+        Log.i(TAG, "webServiceUrl: " + webServiceUrl);
+
+        String jsonString = connectToServiceAndGetJsonString(webServiceUrl);
+        ArrayList<Weather> weatherList = jsonStringDeserialize(jsonString);
         setContentValuesAndPopulateDB(weatherList);
-        Cursor cursor = WeatherDbProvider.database.query(
-                WeatherDbProvider.WeatherDbHelper.TABLE_NAME, FROM_COLUMNS,
-                null, null, null, null, null);
+
+        Cursor cursor = contentResolver.query(WeatherDbProvider.CONTENT_URI, FROM_COLUMNS, null, null, null);
         return cursor;
     }
 
     String connectToServiceAndGetJsonString(URL webServiceUrl) {
+        String jsonString = null;
         BufferedReader inStrmReader = null;
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) webServiceUrl.openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
-            Boolean isConnectionNull = (connection == null);
-            Log.i(TAG, "isConnectionNull: " + isConnectionNull);
 
             inStrmReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder fromJsnStrngBldr = new StringBuilder();
@@ -61,8 +62,8 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
             while ((line = inStrmReader.readLine()) != null) {
                 fromJsnStrngBldr.append(line);
             }
+
             jsonString = fromJsnStrngBldr.toString();
-            Log.i(TAG, "jsonString: " + jsonString);
 
         } catch (IOException e) {
             Log.w(TAG, "Error while receiving data from server", e);
@@ -82,16 +83,15 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
         return jsonString;
     }
 
-    ArrayList<Weather> jsonStringDeserialize() {
+    ArrayList<Weather> jsonStringDeserialize(String jsonString) {
         GsonBuilder gsnBldr = new GsonBuilder();
         gsnBldr.registerTypeAdapter(Weather[].class, new WeatherDeserializer());
         Gson gson = gsnBldr.create();
         Weather[] array = gson.fromJson(jsonString, Weather[].class);
-        weatherList = new ArrayList<>(Arrays.asList(array));
-        return weatherList;
+        return new ArrayList<>(Arrays.asList(array));
     }
 
-    static void setContentValuesAndPopulateDB(ArrayList<Weather> list) {
+    void setContentValuesAndPopulateDB(ArrayList<Weather> list) {
         ContentValues values = new ContentValues();
         for (Weather w : list) {
             values.put(WeatherDbProvider.WeatherDbHelper.CITY_COLUMN, w.city);
@@ -99,12 +99,7 @@ public class GetWeatherTask extends AsyncTask<URL, Void, Cursor> {
             values.put(WeatherDbProvider.WeatherDbHelper.WEATHER_CONDITION_COLUMN, w.weathrCondtns);
             values.put(WeatherDbProvider.WeatherDbHelper.TEMPERATURE_COLUMN, w.temperature);
 
-            long rowId = WeatherDbProvider.database.insert(
-                    WeatherDbProvider.WeatherDbHelper.TABLE_NAME,
-                    WeatherDbProvider.WeatherDbHelper.CITY_COLUMN,
-                    values);
-
-            Log.w(TAG, "-----Number of rows inserted: " + rowId);
+            contentResolver.insert(WeatherDbProvider.CONTENT_URI, values);
         }
     }
 

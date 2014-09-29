@@ -3,6 +3,7 @@
     package="cn.weather">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <!--Allows  app to read the current sync adapter settings.
     For example, you need this permission in order to call getIsSyncable()-->
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
@@ -23,9 +24,9 @@
         android:theme="@style/AppTheme">
 
         <!--The attribute android:process=":sync" tells the system
-        to run the Service in a global shared process named sync.-->
+        to run the service in a global shared process named "sync".-->
         <service
-            android:name="cn.weather.WeatherSyncService"
+            android:name=".WeatherSyncService"
             android:enabled="true"
             android:exported="true"
             android:process=":sync">
@@ -37,7 +38,7 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <service android:name="cn.weather.AuthenticatorService">
+        <service android:name=".AuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -47,7 +48,7 @@
         </service>
 
         <activity
-            android:name="cn.weather.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -63,10 +64,10 @@
             android:syncable="true" />
 
         <activity
-            android:name="cn.weather.Forecast"
+            android:name=".Forecast"
             android:label="@string/title_activity_forecast" />
         <activity
-            android:name="cn.weather.ViewsForLstView"
+            android:name=".ViewsForLstView"
             android:label="@string/title_activity_views_for_lst_view" />
     </application>
 

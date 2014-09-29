@@ -4,7 +4,7 @@
     android:accountType="cn.weather.dbsyncadapter"
     android:userVisible="false"
     android:supportsUploading="false"
-    android:allowParallelSyncs="false"
+    android:allowParallelSyncs="true"
     android:isAlwaysSyncable="true" />
 
     <!--android:contentAuthority="cn.weather.WeatherDbProvider"
